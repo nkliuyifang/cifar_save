@@ -1,0 +1,75 @@
+# -*- coding:utf-8 -*-
+import os
+import pickle as p
+import numpy as np
+from PIL import Image
+
+def load_CIFAR_batch(filename):
+    """ load single batch of cifar """
+    with open(filename, 'rb')as f:
+        datadict = p.load(f)
+        X = datadict['data']
+        Y = datadict['labels']
+        X = X.reshape(10000, 3, 32, 32)
+        Y = np.array(Y)
+        return X, Y
+
+if __name__ == "__main__":
+    
+    if not os.path.exists('train/'):
+        os.mkdir('train/')
+        
+    ct = 0
+    filename = open('train.txt', 'a')
+    for k in range(5):
+        imgX, imgY = load_CIFAR_batch('cifar-10-batches-py/data_batch_' + str(k+1))
+        for i in range(imgX.shape[0]):
+            
+            imgs = imgX[i]
+            label = imgY[i]
+            
+            if not os.path.exists('train/' + str(label)):
+                os.mkdir('train/' + str(label))
+    
+            img0 = imgs[0]
+            img1 = imgs[1]
+            img2 = imgs[2]
+            i0 = Image.fromarray(img0)
+            i1 = Image.fromarray(img1)
+            i2 = Image.fromarray(img2)
+            img = Image.merge('RGB',(i0,i1,i2))
+            name = 'img_' + str(ct)
+            img.save('train/' + str(label) + '/' + name + '.jpg')
+            ct += 1
+            filename.write(str(label) + '/' + name + '.jpg ' + str(label) + '\n')
+    filename.close()
+    
+    
+    
+    if not os.path.exists('val/'):
+        os.mkdir('val/')
+        
+    filename = open('val.txt', 'a')
+    imgX, imgY = load_CIFAR_batch('cifar-10-batches-py/test_batch')
+    for i in range(imgX.shape[0]):
+        
+        imgs = imgX[i]
+        label = imgY[i]
+        
+        if not os.path.exists('val/' + str(label)):
+            os.mkdir('val/' + str(label))
+
+        img0 = imgs[0]
+        img1 = imgs[1]
+        img2 = imgs[2]
+        i0 = Image.fromarray(img0)
+        i1 = Image.fromarray(img1)
+        i2 = Image.fromarray(img2)
+        img = Image.merge('RGB',(i0,i1,i2))
+        name = 'img_' + str(ct)
+        img.save('val/' + str(label) + '/' + name + '.jpg')
+        ct += 1
+        filename.write(str(label) + '/' + name + '.jpg ' + str(label) + '\n')
+    filename.close()
+    
+    print "done"
